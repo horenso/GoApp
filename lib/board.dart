@@ -1,18 +1,16 @@
 /// The board class keeps track of the current state of the game trees
-///
-/// TODO: Should turn be saved here?
 
 import 'dart:io';
 
+// checked referring to marks when counting liberties
 enum Spot { vacant, black, white, black_checked, white_checked }
-
-int a = 0; // TODO: delete it
 
 class Board {
   int size;
   List<List<Spot>> grid;
   bool blacksTurn;
 
+  /// size can be between 2 and 25 
   Board(int size) {
     if (size >= 2 && size <= 25)
       this.size = size;
@@ -25,7 +23,7 @@ class Board {
     this.blacksTurn = true;
   }
 
-  /// Checks whether the given coodinates are on the board
+  /// returns ture if the given coodinates (col, row) are on the board
   bool coordsOnBoard(int col, int row) => (col >= 0 && col < size && row >= 0 && row < size);
 
   /// swaps turns between black and white
@@ -38,7 +36,7 @@ class Board {
     // Adds ABC at the top
     if (coordinates) {
       for (int i = 0; i < size; i++) {
-        s += i.toString() + ' ';
+        s += String.fromCharCode(65+i) + ' ';
       }
       s += '\n';
     }
@@ -46,13 +44,13 @@ class Board {
     int rowNum = 0;
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
-        if (grid[i][j] == Spot.vacant) {
+        if (grid[j][i] == Spot.vacant) {
           s += '+ ';
-        } else if (grid[i][j] == Spot.black) {
+        } else if (grid[j][i] == Spot.black) {
           s += 'O ';
-        } else if (grid[i][j] == Spot.black_checked) {
+        } else if (grid[j][i] == Spot.black_checked) {
           s += 'o ';
-        } else if (grid[i][j] == Spot.white_checked) {
+        } else if (grid[j][i] == Spot.white_checked) {
           s += 'x ';
         } else {
           s += 'X ';
@@ -70,90 +68,68 @@ class Board {
   }
 
   /// Recursive floodfill algorithm that checks whether a group 
-  /// of stones has liberties 
+  /// of stones has liberties, TODO: maybe this should be bool,
+  /// anyways, it works but it doesn't take shared libterties into consideration 
   int countLiberties(bool countForBlack, int col, int row) {
-    // print('Count libterties for black:' + countForBlack.toString());
-    // print('('+row.toString()+', '+col.toString()+')');
-
     int liberties = 0;
 
-    if (!coordsOnBoard(col, row)) {
-      print('Hit the edge while counting, ouch!');
+    if (!coordsOnBoard(col, row))
       return 0;
-    }
 
-    // checked already, no luck here
-    if (grid[col][row] == Spot.black_checked || grid[col][row] == Spot.white_checked) {
-      print('Already checked');
+    // checked already, no additional liberties here
+    if (grid[col][row] == Spot.black_checked || grid[col][row] == Spot.white_checked)
       return 0;
-    }
 
-    if (grid[col][row] == Spot.vacant) {
+    if (grid[col][row] == Spot.vacant)
       return 1;   
-    }
 
     // if Spot has the oponent's color, there is no liberty here
-    if (countForBlack) { 
-      if (grid[col][row] == Spot.white) { 
-        print('White stone occupies libertie of black');
+    if (countForBlack && grid[col][row] == Spot.white)
         return 0;
-      }
-    } else {
-      if (grid[col][row] == Spot.black) {
-        print('Black stone occupies libertie of white');
+    if (!countForBlack && grid[col][row] == Spot.black)
         return 0;
-      }
-    }
 
-
-    print('Marking spot as checked');
+    // print('Marked a stone in the countLibterties function.');
     // mark as checked
     if (grid[col][row] == Spot.white)
       grid[col][row] = Spot.white_checked;
-    else if (grid[col][row] == Spot.black)
+    if (grid[col][row] == Spot.black)
       grid[col][row] = Spot.black_checked;
 
-    // Check accent spots
-    int left = (countLiberties(countForBlack, col-1, row));
-    int right = (countLiberties(countForBlack, col+1, row));
-    int top = (countLiberties(countForBlack, col, row-1));
-    int bottom = (countLiberties(countForBlack, col, row+1));
-
-    print('LEFT: '+left.toString());
-    print('RIGHT: '+right.toString());
-    print('TOP: '+top.toString());
-    print('BOTTOM: '+bottom.toString());  
-
-    liberties += left+right+top+bottom;
+    // Checking adjacent spots, here is where the recursion happens
+    liberties += (countLiberties(countForBlack, col-1, row));
+    liberties += (countLiberties(countForBlack, col+1, row));
+    liberties += (countLiberties(countForBlack, col, row-1));
+    liberties += (countLiberties(countForBlack, col, row+1));
 
     return liberties;
   }
 
   /// This methode changes marked_black to black and marked_white to white,
-  /// if remove is true, those stones will be removed,
+  /// if remove is true, those stones will be replaced by vacant instead
   void clearMarks({bool remove = false}) {
-    print('Clearing Marks! Remove: ' + remove.toString());
+    // print('Clearing Marks! Remove: ' + remove.toString());
     for (int col = 0; col < size; col++) {
       for (int row = 0; row < size; row++) {
-        if (remove) { // if remove option, every check becomes a vacant spot
+        if (remove) { // if remove option, both black_checked and white_checked => vacant
           if (grid[col][row] == Spot.black_checked || grid[col][row] == Spot.black_checked) {
             grid[col][row] = Spot.vacant;
-            print('vacant');
+            // print('vacant');
           }
         } else { // Not remove option, colors become their original 
          if (grid[col][row] == Spot.black_checked) {
-            print('replaced');
+            // print('replaced');
             grid[col][row] = Spot.black;
           } else if (grid[col][row] == Spot.white_checked) {
             grid[col][row] = Spot.white;
-            print('replaced');
+            // print('replaced');
           }
         }
       }
     }
   }
 
-  // swaps colors on the board around, TODO: keep symbols when inverting
+  /// Swaps colors on the board around, TODO: keep symbols when inverting
   void invertColors() {
     for (int col = 0; col < size; col++) {
       for (int row = 0; row < size; row++) {
@@ -167,38 +143,60 @@ class Board {
 
   /// Invertes the position,
   void invertPosition({bool alongX = true}) {
-    List<List<Spot>> tempGrid = List<List<Spot>>.generate(size, 
-      (i) => List<Spot>.generate(size, (j) => Spot.vacant));
+    Spot temp;
+
+    if (alongX) {
+      for (int col = 0; col < (size/2).ceil(); col++) {
+        for (int row = 0; row < size; row++) {
+          temp = grid[col][row];
+          grid[col][row] = grid[size-col-1][row];
+          grid[size-col-1][row] = temp;
+        }
+      }
+    } else {
+      for (int col = 0; col < size; col++) {
+        for (int row = 0; row < (size/2).ceil(); row++) {
+          temp = grid[col][row];
+          grid[col][row] = grid[col][size-row-1];
+          grid[col][size-row-1] = temp;
+        }
+      }  
+    }
+  }
+
+  /// normal matrix transposition, swapping indices 
+  void transposePosition() {
+    Spot temp;
 
     for (int col = 0; col < size; col++) {
-      for (int row = 0; row < size; row++) {
-        if (alongX)
-          tempGrid[col][row] = grid[size-col-1][row];
-        else
-          tempGrid[col][row] = grid[col][size-row-1];
+      for (int row = 0; row < col; row++) {
+        temp = grid[col][row];
+        grid[col][row] = grid[row][col];
+        grid[row][col] = temp;
       }
-    }
-    grid = tempGrid;
+    } 
   }
 
+  /// Rotates the board by 90 degrees
   void rotatePosition({bool clockwise = true}) {
-    return; // TODO: implement
+    transposePosition();
+    invertPosition(alongX: !clockwise);
   }
 
-  /// Removes groups of stones with no liberties
-  /// 
+  /// Removes groups of stones with no liberties 
+  /// on the four adjecent places arount (col, row)
   void removeCaptures(int col, int row) {
-    if (coordsOnBoard(col-1, row))
-      clearMarks(remove: true);
+    if ( coordsOnBoard(col+1, row) )
+      clearMarks(remove: countLiberties(!blacksTurn, col+1, row) == 0);
     
-    if (coordsOnBoard(col+1, row))
-      clearMarks(remove: true);
-
-    if (coordsOnBoard(col, row-1))
-      clearMarks(remove: true);
-
-    if (coordsOnBoard(col, row+1))
-      clearMarks(remove: true);
+    if ( coordsOnBoard(col-1, row) )
+      clearMarks(remove: countLiberties(!blacksTurn, col-1, row) == 0);
+        
+    if ( coordsOnBoard(col, row+1) )
+      clearMarks(remove: countLiberties(!blacksTurn, col, row+1) == 0);
+          
+    if ( coordsOnBoard(col, row-1) )
+      clearMarks(remove: countLiberties(!blacksTurn, col, row-1) == 0);
   }
 
   /// puts a stone on one spot, the difference between putStone and move is
@@ -222,14 +220,14 @@ class Board {
   }
 
   /// player move consists of:
-  /// putting the stone, checking for groups with no liberties and removing them
-  /// swapping turns 
+  /// putting the stone, checking for groups with no liberties, removing them
+  /// and swapping turns 
   void move(int col, int row) {
     if (!putStone(col, row, blacksTurn))
       return;
 
     removeCaptures(col, row);
-    clearMarks();
+    clearMarks(remove: false);
     swapTurns();
   }
 }
@@ -237,12 +235,11 @@ class Board {
 void main() {
   Board b = new Board(19);
 
-  b.putStone(10, 10, false);
-  b.putStone(10, 9, true);
-  b.putStone(9, 10, true);
-  b.putStone(11, 10, true);
+  b.putStone(2, 0, false);
 
   print(b.toString(coordinates: true));
+
+  
 
   while (true) {
     stdout.write("col: ");
@@ -251,11 +248,11 @@ void main() {
     stdout.write("row: ");
     int row = int.parse(stdin.readLineSync());
 
-    b.move(row, col);
-    print('This group has '+b.countLiberties(b.blacksTurn, col, row).toString()+' liberties.');
+    b.move(col, row);
+    // print('This group has '+b.countLiberties(!b.blacksTurn, col, row).toString()+' liberties.');
 
 
-    print('Next move is blacks turn:'+b.blacksTurn.toString());
+    // print('Next move is blacks turn:'+b.blacksTurn.toString());
 
     print(b.toString(coordinates: true));
   }
