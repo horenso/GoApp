@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: new AppBar(
           title: Text("Awesome Go App!"),
-          backgroundColor: Colors.blue,
+          backgroundStone: Stones.blue,
         ),
         body: Center(child: new Text("This is almost real time!")),
       ),

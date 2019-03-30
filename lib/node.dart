@@ -10,6 +10,7 @@ class Node {
 }
 
 class MoveNode extends Node {
+  
   MoveNode(parentId) : super(parentId);
 }
 
