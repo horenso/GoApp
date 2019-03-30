@@ -1,0 +1,4 @@
+RuleSet class: should contain attributes like suicide_allowed, area_scoring, superko, string...
+
+TODO:
+Test suicide
