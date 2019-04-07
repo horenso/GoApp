@@ -89,35 +89,28 @@ class Board {
   /// Recursive floodfill algorithm that checks whether a group
   /// of stones has liberties, TODO: maybe this should be bool,
   /// anyways, it works but it doesn't take shared libterties into consideration
-  int countLiberties(bool countForBlack, int col, int row) {
-    int liberties = 0;
-
-    if (!coordsOnBoard(col, row)) return 0;
+  bool countLiberties(bool countForBlack, int col, int row) {
+    if (!coordsOnBoard(col, row)) return false;
 
     // checked already, no additional liberties here
-    if (grid[col][row].libertyChecked) return 0;
+    if (grid[col][row].libertyChecked) return false;
 
-    if (grid[col][row].stone == Stone.vacant) return 1;
+    if (grid[col][row].stone == Stone.vacant) return false;
 
     // if Intersection has the oponent's stone, there is no liberty here
-    if (countForBlack && grid[col][row].stone == Stone.white) return 0;
+    if (countForBlack && grid[col][row].stone == Stone.white) return false;
 
-    if (!countForBlack && grid[col][row].stone == Stone.black) return 0;
+    if (!countForBlack && grid[col][row].stone == Stone.black) return false;
 
     // print('Marked a stone in the countLibterties function.');
     // mark as checked
-    if (grid[col][row].stone == Stone.white)
-      grid[col][row].libertyChecked = true;
-    if (grid[col][row].stone == Stone.black)
-      grid[col][row].libertyChecked = true;
+    grid[col][row].libertyChecked = true;
 
     // Checking adjacent Intersections, here is where the recursion happens
-    liberties += (countLiberties(countForBlack, col - 1, row));
-    liberties += (countLiberties(countForBlack, col + 1, row));
-    liberties += (countLiberties(countForBlack, col, row - 1));
-    liberties += (countLiberties(countForBlack, col, row + 1));
-
-    return liberties;
+    return (countLiberties(countForBlack, col - 1, row) ||
+        countLiberties(countForBlack, col + 1, row) ||
+        countLiberties(countForBlack, col, row - 1) ||
+        countLiberties(countForBlack, col, row + 1));
   }
 
   /// This methode removes the countLiberties mark from every stone,
