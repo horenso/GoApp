@@ -61,12 +61,12 @@ class Board {
           if (!grid[row][col].libertyChecked)
             s += '#';
           else
-            s += 'x';
+            s += 'u';
         } else if (grid[row][col].stone == Stone.white) {
           if (!grid[row][col].libertyChecked)
             s += 'O';
           else
-            s += 'o';
+            s += 'u';
         }
         if (col + 1 < size) s += ' ';
       }
@@ -97,7 +97,9 @@ class Board {
     // checked already, no additional liberties here
     if (grid[col][row].libertyChecked) return 0;
 
-    if (grid[col][row].stone == Stone.vacant) return 1;
+    if (grid[col][row].stone == Stone.vacant) {
+      return 1;
+    }
 
     // if Intersection has the oponent's stone, there is no liberty here
     if (countForBlack && grid[col][row].stone == Stone.white) return 0;
@@ -227,7 +229,6 @@ class Board {
       return false; // return if putstone() not possible
 
     removeCaptures(col - 1, row - 1);
-    clearMarks(remove: false);
 
     if (countLiberties(blacksTurn, col - 1, row - 1) == 0) {
       grid[col - 1][row - 1].stone = Stone.vacant;

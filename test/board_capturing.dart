@@ -42,6 +42,9 @@ void main() {
   b2.putStone(2, 4, false);
   b2.putStone(3, 4, false);
 
+  print('White has liberties: ' + b2.countLiberties(false, 1, 1).toString());
+  b2.clearMarks();
+
   print(b2.toString(coordinates: false));
   print('----');
   print('Black tries (4, 4): '+b2.move(4, 4).toString());
