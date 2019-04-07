@@ -95,11 +95,11 @@ class Board {
     // checked already, no additional liberties here
     if (grid[col][row].libertyChecked) return false;
 
-    if (grid[col][row].stone == Stone.vacant) return false;
+    // empty intersection has a liberty
+    if (grid[col][row].stone == Stone.vacant) return true;
 
     // if Intersection has the oponent's stone, there is no liberty here
     if (countForBlack && grid[col][row].stone == Stone.white) return false;
-
     if (!countForBlack && grid[col][row].stone == Stone.black) return false;
 
     // print('Marked a stone in the countLibterties function.');
