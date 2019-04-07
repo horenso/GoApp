@@ -2,3 +2,6 @@ RuleSet class: should contain attributes like suicide_allowed, area_scoring, sup
 
 TODO:
 Test suicide
+
+TODO: 
+the hashcode for ko needs to take capures into account otherwise it will not work!!
