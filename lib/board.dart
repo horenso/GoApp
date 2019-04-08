@@ -26,9 +26,10 @@ class Board {
     this.blacksTurn = true;
   }
 
-  /// hashCode of the board
+  /// hashCode of the board TODO: maybe find a quicker way 
   @override
-  int get hashCode => toString().hashCode;
+  // int get hashCode => toString(coordinates: false).hashCode; 
+  int get hashCode => grid.hashCode;
 
   /// equals operator returns equal if two Boards have the same hashCode
   @override
@@ -79,17 +80,10 @@ class Board {
     return s;
   }
 
-  String printTrun() {
-    if (blacksTurn)
-      return 'It\'s blacks turn.';
-    else
-      return 'It\'s whites turn.';
-  }
-
   /// Recursive floodfill algorithm that checks whether a group
   /// of stones has liberties, TODO: maybe this should be bool,
   /// anyways, it works but it doesn't take shared libterties into consideration
-  bool countLiberties(bool countForBlack, int col, int row) {
+  bool hasLiberties(bool countForBlack, int col, int row) {
     if (!coordsOnBoard(col, row)) return false;
 
     // checked already, no additional liberties here
@@ -107,13 +101,13 @@ class Board {
     grid[col][row].libertyChecked = true;
 
     // Checking adjacent Intersections, here is where the recursion happens
-    return (countLiberties(countForBlack, col - 1, row) ||
-        countLiberties(countForBlack, col + 1, row) ||
-        countLiberties(countForBlack, col, row - 1) ||
-        countLiberties(countForBlack, col, row + 1));
+    return (hasLiberties(countForBlack, col - 1, row) ||
+        hasLiberties(countForBlack, col + 1, row) ||
+        hasLiberties(countForBlack, col, row - 1) ||
+        hasLiberties(countForBlack, col, row + 1));
   }
 
-  /// This methode removes the countLiberties mark from every stone,
+  /// This methode removes the hasLiberties mark from every stone,
   /// if remove is active, stones will be removed
   void clearMarks({bool remove = false}) {
     for (int col = 0; col < size; col++) {
@@ -181,16 +175,16 @@ class Board {
   /// on the four adjecent places arount (col, row)
   void removeCaptures(int col, int row) {
     if (coordsOnBoard(col + 1, row))
-      clearMarks(remove: countLiberties(!blacksTurn, col + 1, row) == 0);
+      clearMarks(remove: !hasLiberties(!blacksTurn, col + 1, row));
 
     if (coordsOnBoard(col - 1, row))
-      clearMarks(remove: countLiberties(!blacksTurn, col - 1, row) == 0);
+      clearMarks(remove: !hasLiberties(!blacksTurn, col - 1, row));
 
     if (coordsOnBoard(col, row + 1))
-      clearMarks(remove: countLiberties(!blacksTurn, col, row + 1) == 0);
+      clearMarks(remove: !hasLiberties(!blacksTurn, col, row + 1));
 
     if (coordsOnBoard(col, row - 1))
-      clearMarks(remove: countLiberties(!blacksTurn, col, row - 1) == 0);
+      clearMarks(remove: !hasLiberties(!blacksTurn, col, row - 1));
   }
 
   /// puts a stone on one Intersection, the difference between putStone and move is
@@ -222,7 +216,7 @@ class Board {
     removeCaptures(col - 1, row - 1);
     clearMarks(remove: false);
 
-    if (countLiberties(blacksTurn, col - 1, row - 1) == 0) {
+    if (!hasLiberties(blacksTurn, col - 1, row - 1)) {
       grid[col - 1][row - 1].stone = Stone.vacant;
       clearMarks();
       return false;
@@ -256,7 +250,7 @@ main(List<String> args) {
     int row = int.parse(stdin.readLineSync());
 
     b.move(col, row);
-    // print('This group has '+b.countLiberties(!b.blacksTurn, col, row).toString()+' liberties.');
+    // print('This group has '+b.hasLiberties(!b.blacksTurn, col, row).toString()+' liberties.');
 
     // print('Next move is blacks turn:'+b.blacksTurn.toString());
 
