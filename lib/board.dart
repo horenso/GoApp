@@ -28,8 +28,7 @@ class Board {
 
   /// hashCode of the board TODO: maybe find a quicker way 
   @override
-  // int get hashCode => toString(coordinates: false).hashCode; 
-  int get hashCode => grid.hashCode;
+  int get hashCode => toString(coordinates: false).hashCode; 
 
   /// equals operator returns equal if two Boards have the same hashCode
   @override
@@ -56,19 +55,7 @@ class Board {
 
     for (int row = 0; row < size; row++) {
       for (int col = 0; col < size; col++) {
-        if (grid[row][col].stone == Stone.vacant) {
-          s += '+';
-        } else if (grid[row][col].stone == Stone.black) {
-          if (!grid[row][col].libertyChecked)
-            s += '#';
-          else
-            s += 'u';
-        } else if (grid[row][col].stone == Stone.white) {
-          if (!grid[row][col].libertyChecked)
-            s += 'O';
-          else
-            s += 'u';
-        }
+        s += grid[col][row].character;
         if (col + 1 < size) s += ' ';
       }
       if (coordinates) {

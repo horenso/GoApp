@@ -1,48 +1,29 @@
 enum Stone { vacant, black, white }
-enum Mark {
-  none,
-  x,
-  tri,
-  o,
-  letterA,
-  letterB,
-  letterC,
-  letterD,
-  letterE,
-  letterF,
-  letterG,
-  letterH,
-  letterI,
-  letterJ,
-  letterK,
-  letterL,
-  letterM,
-  letterN,
-  letterO,
-  letterP,
-  letterQ,
-  letterR,
-  letterS,
-  letterT,
-  letterU,
-  letterV,
-  letterW,
-  letterX,
-  letterY,
-  letterZ
-}
 
 class Intersection {
   Stone stone;
-  Mark mark; // sgf allows different marks like x, o, triangle ...
+  String mark; // sgf allows different marks like x, o, triangle, letters
   bool libertyChecked; // for liberty counting
   bool hoshi; // whether this intersection is a star-point (hoshi)
 
   Intersection() {
     stone = Stone.vacant;
-    mark = Mark.none;
+    mark = '';
     libertyChecked = false;
     hoshi = false;
+  }
+
+  /// returns the text representation of that interesetion
+  String get character {
+    // just for debugging, libertyChecked should always be reset
+    if (libertyChecked) return 'u';
+
+    if (stone == Stone.vacant)
+      return '+';
+    else if (stone == Stone.black)
+      return '#';
+    else
+      return 'O';
   }
 
   void inverteStone() {
