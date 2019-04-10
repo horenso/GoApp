@@ -89,14 +89,8 @@ class Board {
     // checked already, no additional liberties here
     if (grid[col][row].libertyChecked) return false;
 
-<<<<<<< HEAD
-    if (grid[col][row].stone == Stone.vacant) {
-      return 1;
-    }
-=======
     // empty intersection has a liberty
     if (grid[col][row].stone == Stone.vacant) return true;
->>>>>>> new
 
     // if Intersection has the oponent's stone, there is no liberty here
     if (countForBlack && grid[col][row].stone == Stone.white) return false;
